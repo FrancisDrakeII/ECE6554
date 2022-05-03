@@ -37,7 +37,6 @@ C = [ 0    0    0              0 ;
 p = [-0.0017, -0.555+13j, -0.555-13j ,-0.3]; %[-0.5,-1,-1-j,-1+j];
 k = place(A,B,p);
 
-r = 1;
 
 u = -k*sys_states;
 sys_states_dot = A*sys_states + B*u + C*sys_states.^2;

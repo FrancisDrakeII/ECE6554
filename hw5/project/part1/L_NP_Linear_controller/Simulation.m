@@ -1,5 +1,5 @@
 % Time
-tmax = 500;
+tmax = 100;
 tspan = [0, tmax];
 
 x_0 = 0;
@@ -24,14 +24,14 @@ figure(1);
     plot(t, theta);
     xlabel('Time(sec)');
     ylabel('\Theta Pendulum');
-    title(['Linear None Perturb Linear Controller: theta = ',num2str(theta_0),' Jp = ',num2str(Jp),' l= ',num2str(l)])  %---------------------------
+    title('Linear None Perturb Linear Controller: theta')  %---------------------------
     grid on;
 
     subplot(2,1,2);
     plot(t, x);
     xlabel('Time(sec)');
     ylabel('Cart Trajectory');
-    title(['Linear None Perturb Linear Controller: x = ',num2str(x_0)])   %---------------------------
+    title('Linear None Perturb Linear Controller: x')   %---------------------------
     grid on;
 
 saveas(figure(1),'Linear Non-Perturb Linear.jpg');

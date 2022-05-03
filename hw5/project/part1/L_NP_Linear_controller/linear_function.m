@@ -27,8 +27,8 @@ B = [0;0;b*alpha*L;-b*alpha];
 p = [-0.002, -0.56+13j, -0.56-13j ,-0.3]; %[-0.5,-1,-1-j,-1+j];
 k = place(A,B,p); %scalar
 
-r = [1;0;0;0];
-u = -k*(sys_states-r);  %-------------------------
+
+u = -k*(sys_states);  %-------------------------
 sys_states_dot = A*sys_states + B*u;
 
 end

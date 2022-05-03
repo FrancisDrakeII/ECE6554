@@ -35,3 +35,6 @@ figure(1);
     ylabel('Cart trajectory');
     title('Nonlinear system Perturb: x')   %---------------------------
     grid on;
+
+ 
+saveas(figure(1),'Nonlinear Perturb Linear.jpg');
