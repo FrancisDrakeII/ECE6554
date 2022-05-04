@@ -1,12 +1,12 @@
 function SysStatedot = FinalProjStep3F(t,SysState)
 %Set Params
 disp(t);
-mc =0.5;
+mc =0.55;
 mp =0.1;
 Jp = 0.006;
 l = 0.3;
-deltatheta = 0.005;
-deltax = 0.01;
+deltatheta = 0.05;
+deltax = 0.09;
 g =9.8;
 M = (mc+mp)/mp/l;
 L = Jp/mp/l;
@@ -17,9 +17,9 @@ Dtheta = deltatheta/mp/l;
 State = SysState(1:4);
 Statem = SysState(5:8);
 kx = SysState(9:12);
-kr = SysState(13);
-W = SysState(14);
-Phi = SysState(15);
+kr = SysState(13:16);
+W = SysState(17);
+Phi = SysState(18);
 
 theta = State(2);
 gamma0 = 1/(M*L-cos(theta).^2);
@@ -50,27 +50,30 @@ D = [0;0; -g*gamma0*cos(theta)*sin(theta); M*g*sin(theta)*gamma0];
 gammax = 10; gammar = 10;gammaw = 10;gammaphi =10;
 
 % ref, step signals here
-r = 1;
+r = [sin(t);0;0;0];
 %error
 e= State-Statem;
 %Place the poles
 global p;
 k =place(AL,BL,p);
 Am = AL-BL*k;
-P = lyap(Am',eye(4));
+
+Q =eye(4);
+P = lyap(Am',Q);
+Ind = e'*P*B;
 %U
-Phix = sin(theta)/b*State(4)*State(4);
-% disp(Phix);
-u = kx'*State+kr*r-W*Phix-Phi*tanh(e'*P*B/20);
+Phix = sin(theta)*State(4)*State(4);
+
+u = kx'*State+kr'*r-W*Phix-Phi*tanh(Ind/10);
 %Update
-% global Noise;
-% State = State+Noise;
+%Noise;
+%UIUC lecture
 Statemdot = Am*Statem+BL.*k'.*r;
 Statedot = A*State + B*u +C*State.*State+D;
-kxdot =gammax.*Projfunc(kx,-State*e'*P*B);
-krdot =gammar.*Projfunc(kr,-r*e'*P*B);
-% disp(Phix*e'*P*B);
-Wdot = gammaw.*Projfunc(W,Phix*e'*P*B);
-Phidot = gammaphi.*Projfunc(Phi,e'*P*B*tanh(e'*P*B/20));
+% Statedot = A*(State+0.25*rand(4,1))+ B*u +C*(State+0.25*rand(4,1)).*(State+0.25*rand(4,1))+D;
+kxdot =gammax.*Projfunc3(kx,-State.*Ind);
+krdot =gammar.*Projfunc3(kr,-r*Ind);
+Wdot = gammaw.*Projfunc3(W,Phix*Ind);
+Phidot = gammaphi.*Projfunc3(Phi,Ind*tanh(Ind/10));
 SysStatedot = [Statedot;Statemdot;kxdot;krdot;Wdot;Phidot];
 end

@@ -1,14 +1,11 @@
 function SysStatedot = FinalProjStep2F(t,SysState)
-disp(t);
 %Set Params
-global alpha1;
-global alpha2;
-global alpha3;
+disp(t);
 mc =0.5;
 mp =0.1;
 Jp = 0.006;
 l = 0.3;
-deltatheta = 0.005;
+deltatheta = 0.05;
 deltax = 0.01;
 g =9.8;
 M = (mc+mp)/mp/l;
@@ -21,9 +18,10 @@ State = SysState(1:4);
 Statem = SysState(5:8);
 kx = SysState(9:12);
 kr = SysState(13:16);
-% alpha1 = SysState(17:36);
-% alpha2 = SysState(37:56);
-% alpha3 = SysState(57:76);
+%If trainning then open them
+alpha1 = SysState(17:36);
+alpha2 = SysState(37:56);
+alpha3 = SysState(57:76);
 theta = State(2);
 gamma0 = 1/(M*L-cos(theta).^2);
 %Find control matrix
@@ -50,9 +48,9 @@ D = [0;0; -g*gamma0*cos(theta)*sin(theta); M*g*sin(theta)*gamma0];
 %Set gammas
 %Note use bigger gamma to converge faster
 gammax = 10; gammar = 10;
-% gammaalpha = 10;
+gammaalpha = 10;
 % ref, step signals here
-r = [1;1;1;1];
+r = [2*sin(t);0;0;0];
 %error
 e= State-Statem;
 %Place the poles
@@ -64,22 +62,29 @@ P = lyap(Am',eye(4));
 global RBF;
 RBF.statevec=State;
 [Phi1,Phi2,Phi3] = Eval(RBF);
-% %projection 
-% alphadot = gammaalpha.*[Proj(alpha1,(e'*P*B).*Phi1);Proj(alpha2,(e'*P*B).*Phi2');Proj(alpha3,(e'*P*B).*Phi3)];
+%projection, trainning process
+alpha1dot = gammaalpha.*Proj2(alpha1,(e'*P*B).*Phi1);
+alpha2dot = gammaalpha.*Proj2(alpha2,(e'*P*B).*Phi2');
+alpha3dot = gammaalpha.*Proj2(alpha3,(e'*P*B).*Phi3);
+%Test Process
+% global alpha1;
+% global alpha2;
+% global alpha3;
 %Get fNN
-fNN = alpha1*Phi1+ alpha2*Phi2'+ alpha3*Phi3;
-% global EofT;
-% Non = (sin(theta)*State(4).^2-M*g*tan(theta))/b;
-% ET= Non-fNN;
-% EofT = vertcat(EofT,abs(ET));
+fNN = transpose(alpha1)*Phi1+ alpha2'*Phi2'+ transpose(alpha3)*Phi3;
+global EofT;
+Non = (sin(theta)*State(4).^2-M*g*tan(theta))/b;
+ET= Non-fNN;
+EofT = vertcat(EofT,abs(ET));
 %U
 u = kx'*State+kr'*r-fNN;
 %Update
-global Noise;
-State = State+Noise;
+% global Noise;
+% State = State+Noise;
 Statemdot = Am*Statem+BL.*k'.*r;
 Statedot = A*State + B*u +C*(State.*State)+D;
-kxdot =-gammax.*State.*e.*sign(B);
-krdot =-gammar.*r.*e.*sign(B);
-SysStatedot = [Statedot;Statemdot;kxdot;krdot];
+kxdot =-gammax.*State.*(e'*sign(B));
+krdot =-gammar.*r.*e'*sign(B);
+SysStatedot = [Statedot;Statemdot;kxdot;krdot;alpha1dot;alpha2dot;alpha3dot];
+% SysStatedot = [Statedot;Statemdot;kxdot;krdot];
 end

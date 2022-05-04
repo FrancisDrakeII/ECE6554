@@ -1,19 +1,19 @@
 clear;
 clc;
 
-tspan = [0,5];%5,10
+tspan = [0,10];
 
 State0 = [0;0.1;0;0]; 
-Statem0 = [0;0.1;0;0];
+Statem0 = [0;0.01;0;0];
 
 
 global p;
 
-p=[-0.002, -0.58+13j, -0.58-13j ,-0.3];
-kx_0 = [-0.0024  ;-51;   -1.1;  29];  %Initialize from pole placement
-kr_0 = 5; 
-W0 = 1;
-Phi0 =1;
+p=[-0.0017, -0.6+10j, -0.6-10j ,-0.3]; 
+kx_0 = [-0.0017 ;-33.1989; -0.8357; -0.6992];  %Initialize from pole placement
+kr_0 = -[-0.0017 ;-33.1989; -0.8357; -0.6992]; 
+W0 = 0;
+Phi0 =0;
 
 SysState0= [State0; Statem0; kx_0; kr_0;W0;Phi0];
 
@@ -26,8 +26,8 @@ theta = SysState(:,2);
 thetam = SysState(:,6);
 kx = SysState(:,9:12);
 kr = SysState(:,13);
-W = SysState(:,14);
-Phi = SysState(:,15);
+W = SysState(:,17);
+Phi = SysState(:,18);
 e = theta-thetam;
 
 figure(1);
