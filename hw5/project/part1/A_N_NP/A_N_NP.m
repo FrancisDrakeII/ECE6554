@@ -57,28 +57,34 @@ b_P = 1/(mp_P*l_P);
 Dx_P = delta_x_P/(mp_P*g_P*l_P);
 Dtheta_P = delta_theta_P/(mp_P*g_P*l_P);
 
-coeff_P = 1/(M_P*L_P-1);
+coeff_P = 1/(M_P*L_P-cos(Y_P(2))^2);
 
-A_P = [0    0       1                0          ; 
-     0    0       0                1          ;
-     0   -g_P*coeff_P   -coeff_P*L_P*Dx_P    coeff_P*Dtheta_P   ; 
-     0   M_P*g_P*coeff_P   coeff_P*Dtheta_P -coeff_P*M_P*Dtheta_P];
+A_P = [0    0       1                      0          ; 
+       0    0       0                      1          ;
+       0   0   -coeff_P*L_P*Dx_P           coeff_P*Dtheta_P*cos(Y_P(2)); 
+       0   0   coeff_P*Dtheta_P*cos(Y_P(2))  -coeff_P*M_P*Dtheta_P];
 
 B_P = [    0     ;
-         0     ;
+           0     ;
       b_P*coeff_P*L_P;
-     -b_P*coeff_P ];
+     -b_P*coeff_P*cos(Y_P(2)) ];
 
 C_P = [ 0    0    0              0 ;
-      0    0    0              0;
-      0    0    0    coeff_P*Y_P(2)*L_P;
-      0    0    0    -Y_P(2)*L_P];
+        0    0    0              0;
+        0    0    0    coeff_P*L_P*sin(Y_P(2));
+        0    0    0    -coeff_P*cos(Y_P(2))*sin(Y_P(2))];
+D_P = [ 0;
+        0;
+        -g*cos(Y_P(2))*sin(Y_P(2))*coeff_P;
+        M_P*g*sin(Y_P(2))*coeff_P];
+
+
 
 
 gamma_x = 10; gamma_r = 10;
 
 
-r = 1;
+r = [sin(t);0;0;0];
 
 
 
@@ -87,17 +93,17 @@ e = Y_P - Y;
 global p;
 k = place(A,B,p);
 A = A-B*k;
-u = kx.*Y_P + kr*r; 
+P = lyap(A,eye(4));
+A_P = A_P-B_P*k;
 
-Y_P_dot = transpose(A_P*transpose(Y_P) + B_P.*transpose(u)) + C_P*transpose(Y_P.^2);     
-Y_P_dot = Y_P_dot(1,:);
+u = kx.*Y_P + kr.*(transpose(r));
 
-Y_dot = transpose(A*transpose(Y) + B.*transpose(k)*r)+ C*transpose(Y.^2); 
-Y_dot = Y_dot(1,:);
+Y_P_dot = A_P*transpose(Y_P) + B_P.*transpose(u) + C_P*transpose(Y_P.^2) + D_P; 
 
-kx_dot = -gamma_x*Y_P.*e.*transpose(sign(B_P)); 
-kr_dot = -gamma_r*[r r r r].*e.*transpose(sign(B_P));
+Y_dot = A*transpose(Y) + B.*transpose(k.*transpose(r));
+kx_dot = -gamma_x*Y_P.*(e*P*B_P); 
+kr_dot = -gamma_r*transpose(r).*(e*P*B_P);
 
-sys_states_dot = [transpose(Y_dot); transpose(Y_P_dot); transpose(kx_dot); transpose(kr_dot)];
+sys_states_dot = [Y_dot; Y_P_dot; transpose(kx_dot); transpose(kr_dot)];
 
 end

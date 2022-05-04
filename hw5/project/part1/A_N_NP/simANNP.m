@@ -1,8 +1,6 @@
-%----------------------------Linear System NP Adaptive Control--------------------
-close all; clear all;
 
 % Time
-tmax = 20;
+tmax = 10;
 tspan = [0, tmax];
 
 % Initialization
@@ -54,7 +52,7 @@ kr = sys_states(:,13:16);
 
 e = x_P-x;
 
-r = 1;
+
 
 figure(1);
     subplot(4,1,1);

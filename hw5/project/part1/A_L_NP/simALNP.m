@@ -1,5 +1,3 @@
-%----------------------------Linear System NP Adaptive Control--------------------
-close all; clear all;
 
 % Time
 tmax = 10;
